@@ -10,7 +10,7 @@ using static Oxira.Events.Domain.Text;
 
 namespace Oxira.Events.Application.Features.Alerts;
 
-public record SubscribeAlertsCommand(AlertsInput Input) : ICommand<OkResult>;
+public record SubscribeAlertsCommand(AlertsInput Input) : ICommand<SuccessResult>;
 public record UnsubscribeCommand(string Token) : ICommand<bool>;
 /// <summary>the scheduled job: email each subscriber about shows reaching ~60 and ~21 days ahead</summary>
 public record SendDueAlertsCommand : ICommand<int>;
@@ -18,15 +18,15 @@ public record ListSubscribersQuery(bool ActiveOnly = true) : IQuery<List<Subscri
 
 public class AlertHandlers(IAppDbContext db, TimeProvider clock, IEmailSender email, IExhibitionFeed feed,
     IOptions<SiteOptions> site, IOptions<AlertOptions> opt, ILogger<AlertHandlers> log)
-    : IRequestHandler<SubscribeAlertsCommand, OkResult>, IRequestHandler<UnsubscribeCommand, bool>,
+    : IRequestHandler<SubscribeAlertsCommand, SuccessResult>, IRequestHandler<UnsubscribeCommand, bool>,
       IRequestHandler<SendDueAlertsCommand, int>, IRequestHandler<ListSubscribersQuery, List<SubscriberDto>>
 {
     private string UnsubUrl(AlertSubscriber s) => $"{site.Value.ApiUrl.TrimEnd('/')}/api/alerts/unsubscribe?t={s.Token}";
 
-    public async Task<OkResult> Handle(SubscribeAlertsCommand cmd, CancellationToken ct)
+    public async Task<SuccessResult> Handle(SubscribeAlertsCommand cmd, CancellationToken ct)
     {
         var i = cmd.Input;
-        if (!string.IsNullOrEmpty(i.CompanyWebsite)) return new OkResult();
+        if (!string.IsNullOrEmpty(i.CompanyWebsite)) return new SuccessResult();
         var mail = Clip(i.Email, 160).ToLowerInvariant();
         var sectors = (i.Sectors ?? []).Where(Sectors.All.Contains).Distinct().ToList();
         if (!IsEmail(mail) || sectors.Count == 0) throw new DomainException("أدخل بريدًا صحيحًا واختر مجالًا واحدًا على الأقل", "invalid");
@@ -44,7 +44,7 @@ public class AlertHandlers(IAppDbContext db, TimeProvider clock, IEmailSender em
         s.UnsubscribedAt = null;
         await db.SaveChangesAsync(ct);
         if (isNew) email.Enqueue(Templates.AlertWelcome(s, UnsubUrl(s)));
-        return new OkResult();
+        return new SuccessResult();
     }
 
     public async Task<bool> Handle(UnsubscribeCommand cmd, CancellationToken ct)

@@ -54,7 +54,7 @@ public class BookingsController(ISender mediator) : ControllerBase
 public class AlertsController(ISender mediator) : ControllerBase
 {
     [HttpPost, EnableRateLimiting("forms")]
-    public Task<OkResult> Subscribe(AlertsInput body, CancellationToken ct) => mediator.Send(new SubscribeAlertsCommand(body), ct);
+    public Task<SuccessResult> Subscribe(AlertsInput body, CancellationToken ct) => mediator.Send(new SubscribeAlertsCommand(body), ct);
 
     /// <summary>The link in every alert email. Returns a small HTML page.</summary>
     [HttpGet("unsubscribe")]

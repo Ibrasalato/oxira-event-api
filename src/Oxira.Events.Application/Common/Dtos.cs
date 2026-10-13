@@ -34,7 +34,7 @@ public record RenderInput(string? SessionId, string? Lang, string? Image, JsonEl
 
 // ───── results (shapes the website already reads) ─────
 public record SubmitResult(bool Success, int Id);
-public record OkResult(bool Success = true);
+public record SuccessResult(bool Success = true);
 public record ChatReply(bool Success, string Reply);
 public record RenderResult(bool Success, string? Image, int Left, string? Reason = null);
 public record SlotsResult(string From, string To, List<string> Taken);
