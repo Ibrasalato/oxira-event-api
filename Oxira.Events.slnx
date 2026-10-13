@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Oxira.Events.Domain/Oxira.Events.Domain.csproj" />
+    <Project Path="src/Oxira.Events.Application/Oxira.Events.Application.csproj" />
+    <Project Path="src/Oxira.Events.Infrastructure/Oxira.Events.Infrastructure.csproj" />
+    <Project Path="src/Oxira.Events.Api/Oxira.Events.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Oxira.Events.Tests/Oxira.Events.Tests.csproj" />
+  </Folder>
+</Solution>
