@@ -306,3 +306,18 @@ public class SwaggerTests(TestApp app) : IClassFixture<TestApp>
         Assert.Equal(HttpStatusCode.OK, (await app.Client().GetAsync("/swagger/index.html")).StatusCode);
     }
 }
+
+public class ProxyTests
+{
+    [Theory]
+    [InlineData("104.16.1.1", true)]
+    [InlineData("162.158.10.20", true)]
+    [InlineData("2606:4700::1", true)]
+    [InlineData("8.8.8.8", false)]
+    [InlineData("10.0.0.5", false)]
+    public void Only_cloudflare_edges_are_trusted(string ip, bool trusted)
+    {
+        var cfg = new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build();
+        Assert.Equal(trusted, Oxira.Events.Api.Infrastructure.CloudflareRanges.Contains(cfg, System.Net.IPAddress.Parse(ip)));
+    }
+}
