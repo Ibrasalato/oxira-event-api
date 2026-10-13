@@ -90,6 +90,7 @@ public static class Http
     private static async Task<JsonElement> Read(HttpResponseMessage res)
     {
         var text = await res.Content.ReadAsStringAsync();
+        if ((int)res.StatusCode >= 500) throw new HttpRequestException($"{(int)res.StatusCode} {res.RequestMessage?.RequestUri}: {text}");
         return text.Length > 0 && (text[0] == '{' || text[0] == '[') ? JsonDocument.Parse(text).RootElement.Clone() : default;
     }
 }

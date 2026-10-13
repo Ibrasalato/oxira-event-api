@@ -58,7 +58,7 @@ public class HttpCurrentUser(IHttpContextAccessor http, IConfiguration cfg) : IC
 }
 
 /// <summary>Business errors become {"success":false,"reason":"…","message":"…"} with their status; anything else is logged and hidden.</summary>
-public class ErrorHandler(ILogger<ErrorHandler> log) : IExceptionHandler
+public class ErrorHandler(ILogger<ErrorHandler> log, IHostEnvironment env) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext ctx, Exception e, CancellationToken ct)
     {
@@ -72,7 +72,9 @@ public class ErrorHandler(ILogger<ErrorHandler> log) : IExceptionHandler
         };
         if (status >= 500) log.LogError(e, "Unhandled error on {Path}", ctx.Request.Path);
         ctx.Response.StatusCode = status;
-        await ctx.Response.WriteAsJsonAsync(new { success = false, reason, message }, ct);
+        // development: the exception text helps while trying endpoints in Swagger (never in production)
+        if (status >= 500 && env.IsDevelopment()) await ctx.Response.WriteAsJsonAsync(new { success = false, reason, message, error = e.ToString()[..Math.Min(e.ToString().Length, 3000)] }, ct);
+        else await ctx.Response.WriteAsJsonAsync(new { success = false, reason, message }, ct);
         return true;
     }
 }
